@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <EditText
+        android:id="@+id/addressEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:hint="Enter address"
+        android:minHeight="48dp" />
+
+    <Button
+        android:id="@+id/geocodeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Geocode"
+        android:layout_below="@id/addressEditText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
+    <TextView
+        android:id="@+id/geocodeOutputTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_below="@id/geocodeButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
+    <Button
+        android:id="@+id/reverseGeocodeButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Reverse Geocode"
+        android:layout_below="@id/geocodeOutputTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"></LinearLayout>
+
+</RelativeLayout>
+
+package com.example.geocoding;
+
+import android.location.Address;
+import android.location.Geocoder;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+public class MainActivity extends AppCompatActivity {
+
+    private Geocoder geocoder;
+    private TextView geocodeOutputTextView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        geocoder = new Geocoder(this, Locale.getDefault());
+        geocodeOutputTextView = findViewById(R.id.geocodeOutputTextView);
+        Button geocodeButton = findViewById(R.id.geocodeButton);
+        Button reverseGeocodeButton = findViewById(R.id.reverseGeocodeButton);
+
+        geocodeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText addressEditText = findViewById(R.id.addressEditText);
+                String address = addressEditText.getText().toString();
+                try {
+                    List<Address> addresses = geocoder.getFromLocationName(address, 1);
+                    if (!addresses.isEmpty()) {
+                        Address location = addresses.get(0);
+                        double latitude = location.getLatitude();
+                        double longitude = location.getLongitude();
+                        String output = "Latitude: " + latitude + ", Longitude: " + longitude;
+                        geocodeOutputTextView.setText(output);
+                    } else {
+                        Toast.makeText(MainActivity.this, "Location not found", Toast.LENGTH_SHORT).show();
+                    }
+                } catch (IOException e) {
+                    Log.e("Geocode", "Geocoding failed: " + e.getMessage());
+                }
+            }
+        });
+
+        reverseGeocodeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String geocodeOutput = geocodeOutputTextView.getText().toString();
+                String[] parts = geocodeOutput.split(",");
+                if (parts.length == 2) {
+                    double latitude = Double.parseDouble(parts[0].split(":")[1].trim());
+                    double longitude = Double.parseDouble(parts[1].split(":")[1].trim());
+                    try {
+                        List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                        if (!addresses.isEmpty()) {
+                            Address location = addresses.get(0);
+                            String addressLine = location.getAddressLine(0);
+                            Toast.makeText(MainActivity.this, "Address: " + addressLine, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Location not found", Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (IOException e) {
+                        Log.e("ReverseGeocode", "Reverse geocoding failed: " + e.getMessage());
+                    }
+                } else {
+                    Toast.makeText(MainActivity.this, "Invalid geocode output", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+}
+
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+ <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+ <uses-permission android:name="android.permission.INTERNET"/>

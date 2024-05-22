@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+   <EditText
+       android:id="@+id/et1"
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:hint="Enter user name"/>
+
+    <EditText
+        android:id="@+id/et2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et1"
+        android:hint="Enter password"
+        android:minHeight="48dp" />
+
+    <Button
+        android:id="@+id/b"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/switch1"
+        android:hint="Register"/>
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/et2"
+        android:minHeight="48dp"
+        android:text="Switch" />
+</RelativeLayout>
+
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Switch;
+import android.widget.Toast;
+
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        EditText ed1 = findViewById(R.id.et1);
+        EditText ed2 = findViewById(R.id.et2);
+        Button b = findViewById(R.id.b);
+        Switch s = findViewById(R.id.switch1);
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        boolean isdarkmode = sharedPreferences.getBoolean("Dark mode",false);
+        s.setChecked(isdarkmode);
+        String username = sharedPreferences.getString("username","");
+        String password = sharedPreferences.getString("Password","");
+        s.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            if(isChecked){
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+            }
+            else{
+                AppCompatDelegate.setDefaultNightMode((AppCompatDelegate.MODE_NIGHT_NO));
+            }
+
+        });
+        b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String username = ed1.getText().toString();
+                String password = ed2.getText().toString();
+                if(username.isEmpty() || password.isEmpty()){
+                    Toast.makeText(MainActivity.this, "Enter all Fields", Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("username",username);
+                    editor.putString("password",password);
+                    editor.putBoolean("Dark mode",s.isChecked());
+                    editor.apply();
+                    Toast.makeText(MainActivity.this, "Registered", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+}

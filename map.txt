@@ -1,0 +1,118 @@
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.location.Address;
+import android.location.Geocoder;
+import android.os.Bundle;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
+    private Geocoder geocoder;
+    private GoogleMap map;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        geocoder=new Geocoder(this, Locale.getDefault());
+        SupportMapFragment su=(SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.frag);
+        su.getMapAsync(this);
+
+    }
+
+    @Override
+    public void onMapClick(@NonNull LatLng latLng) {
+        MarkerOptions m=new MarkerOptions().position(latLng);
+        try {
+            List<Address> address=geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            Address ad=address.get(0);
+            StringBuilder br=new StringBuilder();
+            br.append(ad.getAddressLine(0));
+            m.title(br.toString());
+
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+      map.addMarker(m);
+        map.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        map=googleMap;
+        map.setOnMapClickListener(this);
+
+    }
+}
+xml:
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="409dp"
+        android:layout_height="729dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="1dp"
+        tools:ignore="MissingConstraints">
+        <fragment
+            android:id="@+id/frag"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:ignore="MissingClass" />
+
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
+manifest:
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+<uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <application
+
+
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Exp3map"
+        tools:targetApi="31">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD3t4mfJNy9NxxVKT4J_T47soKBgCRUTO4"/>
+        <activity
+
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+implementation 'com.google.android.gms:play-services-maps:17.0.0'
+

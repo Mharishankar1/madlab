@@ -1,0 +1,57 @@
+manifest.xml
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.CHANGE_WIFI_STATE"/>
+activity.xml
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/wifiSwitch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Click" />
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/wifiSwitch"
+        android:layout_centerHorizontal="true"
+        android:hint="Wifi Status"
+        android:textSize="30sp" />
+
+</RelativeLayout>
+mainactivity.java
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+import android.net.wifi.WifiManager;
+
+public class MainActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Button btn = findViewById(R.id.wifiSwitch);
+        TextView textView = findViewById(R.id.tv);
+        WifiManager wifi = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        btn.setOnClickListener(view -> {
+            wifi.setWifiEnabled(!wifi.isWifiEnabled());
+
+            if (!wifi.isWifiEnabled()) {
+                textView.setText("Wifi is OFF");
+            } else {
+                textView.setText("Wifi is ON");
+            }
+        });
+    }
+}
